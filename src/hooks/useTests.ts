@@ -8,16 +8,22 @@ export function useTests(subjectId: number | null) {
   const [loading, setLoading] = useState(true);
 
   const fetchTests = useCallback(async () => {
-    if (!subjectId) { setTests([]); setLoading(false); return; }
-    setLoading(true);
+  if (!subjectId) { setTests([]); setLoading(false); return; }
+  if (!supabase) { setLoading(false); return; }  // ← shu qator qo'shing
+  setLoading(true);
+  try {
     const { data, error } = await supabase
       .from('tests')
       .select('*')
       .eq('subject_id', subjectId)
       .order('id');
     if (!error && data) setTests(data);
+  } catch (e) {
+    console.error('fetchTests error:', e);
+  } finally {
     setLoading(false);
-  }, [subjectId]);
+  }
+}, [subjectId]);
 
   const fetchResults = useCallback(async () => {
     if (!subjectId) { setResults([]); return; }
